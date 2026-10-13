@@ -11,7 +11,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     final int originalTileSize = 18; // 18x18 tile
     final int scale = 3;
     final int tileSize = originalTileSize * scale; // 54x54 tile
-    final int maxScreenCol = 25;
+    final int maxScreenCol = 22;
     final int maxScreenRow = 12;
     final int screenWidth = tileSize * maxScreenCol; // 864px
     final int screenHeight = tileSize * maxScreenRow; // 576px
@@ -27,6 +27,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     
     // Physics Engine Basics
     double yVelocity = 0;
+    double xVelocity = 0;
     // double gravity = 0.5;
     boolean isGrounded = false;
     boolean leftPressed, rightPressed, downPressed, upPressed;
@@ -77,6 +78,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         // Gravity Application
         // yVelocity += gravity;
         playerY += yVelocity;
+        playerX += xVelocity;
 
         // Temporary Ground Collision (Bottom of screen minus player height)
         int groundLevel = screenHeight - tileSize - 20;
@@ -87,6 +89,25 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         } else {
             isGrounded = false;
         }
+
+        int wallsLeft = 0;
+        if (playerX <= wallsLeft) {
+            playerX = wallsLeft;
+            xVelocity = 0;
+        }
+
+        int wallsRight = screenWidth - tileSize;
+        if (playerX >= wallsRight) {
+            playerX = wallsRight;
+            xVelocity = 0;
+        }
+
+        int top = 0;
+        if (playerY <= top) {
+            playerY = top;
+            yVelocity = 0;
+        }
+
     }
 
     // Rendering Graphics
@@ -98,6 +119,19 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         // Draw Environment Ground
         g2.setColor(Color.WHITE);
         g2.fillRect(0, screenHeight - tileSize + 20, screenWidth, tileSize -35);
+
+        // --- DRAW VERTICAL FIELD MARKERS ---
+        g2.setColor(Color.WHITE); // Choose a color for the markers
+        
+        int markerSpacing = screenWidth/10; // Distance between each vertical line in pixels
+        int markerHeight = screenHeight;   // Height of the markers
+        
+        // Loop from 0 up to the screen width, drawing a line at each interval
+        for (int x = 0; x < screenWidth; x += markerSpacing) {
+            // Draw lines sticking up from the ground line
+            int groundY = screenHeight - tileSize + 20;
+            g2.fillRect(x, groundY - screenHeight, 10, markerHeight);
+        }
 
         // Draw Player Sprite (Square Placeholder)
         g2.setColor(Color.MAGENTA);
